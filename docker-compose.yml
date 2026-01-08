@@ -1,0 +1,77 @@
+services:
+  # Ollama - Local LLM for prompt enhancement
+  # Note: On macOS, Ollama runs natively for GPU access
+  # This container is for Linux/CI environments
+  # ollama:
+  #   image: ollama/ollama:latest
+  #   container_name: mcp-ollama
+  #   ports:
+  #     - "11434:11434"
+  #   volumes:
+  #     - ollama_models:/root/.ollama
+  #   restart: unless-stopped
+
+  # MCP Router - Main entry point
+  router:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mcp-router
+    ports:
+      - "${ROUTER_PORT:-9090}:9090"
+    environment:
+      - OLLAMA_HOST=${OLLAMA_HOST:-host.docker.internal}
+      - OLLAMA_PORT=${OLLAMA_PORT:-11434}
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-deepseek-r1}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    env_file:
+      - .env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on: []
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9090/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Context7 - Library documentation
+  context7:
+    image: node:20-slim
+    container_name: mcp-context7
+    working_dir: /app
+    command: ["node", "node_modules/@upstash/context7-mcp/dist/index.js"]
+    volumes:
+      - ./node_modules:/app/node_modules:ro
+    expose:
+      - "3001"
+    restart: unless-stopped
+
+  # Desktop Commander - File ops and terminal
+  desktop-commander:
+    image: node:20-slim
+    container_name: mcp-desktop-commander
+    working_dir: /app
+    command: ["node", "node_modules/@wonderwhy-er/desktop-commander/dist/index.js"]
+    volumes:
+      - ./node_modules:/app/node_modules:ro
+      - ${HOME}:/host-home:rw  # Access to host filesystem
+    expose:
+      - "3002"
+    restart: unless-stopped
+
+  # Sequential Thinking - Reasoning chains
+  sequential-thinking:
+    image: node:20-slim
+    container_name: mcp-sequential-thinking
+    working_dir: /app
+    command: ["node", "node_modules/@modelcontextprotocol/server-sequential-thinking/dist/index.js"]
+    volumes:
+      - ./node_modules:/app/node_modules:ro
+    expose:
+      - "3003"
+    restart: unless-stopped
+
+volumes:
+  ollama_models:
