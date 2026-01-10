@@ -100,6 +100,7 @@ ComfyUI → Draw Things
 |-----------|------|---------|
 | **Router** | HTTP proxy, enhancement orchestration, circuit breaker | Container |
 | **Ollama** | Local LLM inference (prompt enhancement + embeddings) | Native macOS (GPU access) |
+| **Qdrant** | Vector storage for embeddings (prompt cache, semantic search) | Container |
 | **Memory Server** | Persistent knowledge graph with semantic search | Container |
 | **Context7** | Library documentation lookup | Container |
 | **Desktop Commander** | File operations, terminal commands | Container |
@@ -168,6 +169,7 @@ The router normalizes transport differences so clients see a unified HTTP interf
 |---------|------|----------|
 | Router | 9090 | Host (all clients connect here) |
 | Ollama | 11434 | Host (native macOS) |
+| Qdrant | 6333 | Host (REST API + dashboard) |
 | Context7 | 3001 | Internal only |
 | Desktop Commander | 3002 | Internal only |
 | Sequential Thinking | 3003 | Internal only |
@@ -391,6 +393,164 @@ class PromptCache:
 - Per-endpoint rules (`/mcp/context7/*` uses different model)
 - Prompt-type detection (code vs docs vs Q&A)
 - Redis upgrade path for distributed caching
+
+---
+
+### 3.2.1 Vector Storage with Qdrant
+
+> **When to add**: Upgrade from in-memory cache when you need persistence across restarts or have >10K cached prompts.
+
+Qdrant replaces the in-memory `embed_cache` with persistent, indexed vector storage.
+
+**Why Qdrant over in-memory:**
+- **Persistence**: Cache survives router restarts
+- **Scale**: Handles millions of vectors efficiently
+- **Speed**: HNSW index for sub-millisecond similarity search
+- **Dashboard**: Built-in UI at `http://localhost:6333/dashboard`
+
+**Docker Setup** (add to docker-compose.yml):
+
+```yaml
+  qdrant:
+    image: qdrant/qdrant
+    ports:
+      - "6333:6333"
+    volumes:
+      - ./qdrant_storage:/qdrant/storage
+    environment:
+      - QDRANT__SERVICE__GRPC_PORT=6334
+```
+
+**Colima Prerequisite** (macOS):
+
+```bash
+# Ensure Colima is running with Docker runtime
+colima status
+colima start --runtime docker
+
+# Point Docker CLI to Colima
+docker context use colima
+# OR
+export DOCKER_HOST="unix://$HOME/.colima/default/docker.sock"
+```
+
+**Python Integration**:
+
+```python
+# router/cache_qdrant.py
+from qdrant_client import QdrantClient
+from qdrant_client.models import Distance, VectorParams, PointStruct
+import uuid
+
+class QdrantPromptCache:
+    """Persistent vector cache using Qdrant."""
+
+    def __init__(
+        self,
+        url: str = "http://localhost:6333",
+        collection: str = "prompt_cache",
+        similarity_threshold: float = 0.85,
+        vector_size: int = 768  # nomic-embed-text dimension
+    ):
+        self.client = QdrantClient(url=url)
+        self.collection = collection
+        self.threshold = similarity_threshold
+
+        # Create collection if not exists
+        if not self.client.collection_exists(collection):
+            self.client.create_collection(
+                collection_name=collection,
+                vectors_config=VectorParams(
+                    size=vector_size,
+                    distance=Distance.COSINE
+                )
+            )
+
+    def get(self, embedding: list[float]) -> str | None:
+        """Search for similar prompt, return cached response if found."""
+        results = self.client.search(
+            collection_name=self.collection,
+            query_vector=embedding,
+            limit=1,
+            score_threshold=self.threshold
+        )
+
+        if results:
+            return results[0].payload.get("response")
+        return None
+
+    def put(self, prompt: str, response: str, embedding: list[float]):
+        """Store prompt-response pair with embedding."""
+        self.client.upsert(
+            collection_name=self.collection,
+            points=[
+                PointStruct(
+                    id=str(uuid.uuid4()),
+                    vector=embedding,
+                    payload={
+                        "prompt": prompt,
+                        "response": response
+                    }
+                )
+            ]
+        )
+
+    def clear(self):
+        """Clear all cached entries."""
+        self.client.delete_collection(self.collection)
+```
+
+**Integration with Enhancement Middleware**:
+
+```python
+# router/middleware/enhance.py
+from router.cache_qdrant import QdrantPromptCache
+
+# Initialize (in FastAPI lifespan)
+cache = QdrantPromptCache(url=settings.qdrant_url)
+
+async def enhance_prompt(prompt: str, client: str) -> str:
+    # Generate embedding via Ollama
+    embedding = await ollama_embed(prompt, model="nomic-embed-text")
+
+    # Check Qdrant cache
+    cached = cache.get(embedding)
+    if cached:
+        return cached
+
+    # Enhance via Ollama
+    enhanced = await ollama_generate(...)
+
+    # Store in Qdrant
+    cache.put(prompt, enhanced, embedding)
+
+    return enhanced
+```
+
+**Settings Addition** (`router/config.py`):
+
+```python
+class Settings(BaseSettings):
+    # ... existing settings ...
+    qdrant_url: str = "http://localhost:6333"
+    qdrant_collection: str = "prompt_cache"
+```
+
+**Health Check** (add Qdrant to `/health`):
+
+```python
+async def check_qdrant_health() -> dict:
+    try:
+        client = QdrantClient(url=settings.qdrant_url)
+        info = client.get_collection(settings.qdrant_collection)
+        return {
+            "name": "qdrant",
+            "status": "healthy",
+            "vectors_count": info.vectors_count
+        }
+    except Exception as e:
+        return {"name": "qdrant", "status": "down", "error": str(e)}
+```
 
 ---
 
@@ -1743,6 +1903,16 @@ services:
       - ./node_modules:/app/node_modules:ro
     expose:
       - "3003"
+
+  # Optional: Vector storage for persistent prompt cache
+  qdrant:
+    image: qdrant/qdrant
+    ports:
+      - "6333:6333"
+    volumes:
+      - ./qdrant_storage:/qdrant/storage
+    environment:
+      - QDRANT__SERVICE__GRPC_PORT=6334
 ```
 
 ### `.env.example`
@@ -1773,6 +1943,7 @@ httpx>=0.26.0
 python-dotenv>=1.0.0
 jinja2>=3.1.0
 numpy>=1.26.0
+qdrant-client>=1.7.0  # Optional: for persistent vector cache
 ```
 
 ### `.gitignore`
@@ -1797,6 +1968,9 @@ node_modules/
 
 # Docker
 *.log
+
+# Qdrant
+qdrant_storage/
 ```
 
 ---
