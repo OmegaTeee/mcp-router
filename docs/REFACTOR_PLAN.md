@@ -69,7 +69,7 @@ A lightweight, containerized **MCP router layer** running locally via Colima tha
 - [ ] Volume mounts for model persistence
 
 ### 1.3 Reference Extraction
-- [ ] Extract useful patterns from `mcp-example/`:
+- [ ] Refactor `mcp-example/`:
   - Keychain secrets management → adapt for Docker secrets
   - `proxy-config.json` structure → base for router config
   - Wrapper script patterns → containerized equivalents
@@ -97,6 +97,7 @@ A lightweight, containerized **MCP router layer** running locally via Colima tha
 - [ ] Sequential Thinking (reasoning)
 - [ ] Fetch (web content)
 - [ ] Custom servers as needed
+- [ ] fsdfds
 
 ---
 
