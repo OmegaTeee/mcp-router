@@ -1,15 +1,35 @@
 {
   "disabledMcpjsonServers": [
-    "fetch",
-    "desktop-commander",
-    "sequential-thinking",
-    "deepseek-reasoner",
-    "skills-mcp",
-    "context7",
-    "obsidian",
-    "obsidian-mcp-tools",
     "hugging-face",
     "draw-things",
     "llm-text"
-  ]
+  ],
+  "permissions": {
+    "allow": [
+      "Bash(~/.zshrc)",
+      "Bash(cat:*)",
+      "Bash(cat:*)",
+      "Bash(chmod:*)",
+      "Bash(curl:*)",
+      "Bash(curl:*)",
+      "Bash(do echo \"✓ $f\")",
+      "Bash(done)",
+      "Bash(fi)",
+      "Bash(file:*)",
+      "Bash(git:*)",
+      "Bash(ls:*)",
+      "Bash(lsof:*)",
+      "Bash(mdfind:*)",
+      "Bash(node:*)",
+      "Bash(npm run:*)",
+      "Bash(npm search:*)",
+      "Bash(pip install:*)",
+      "Bash(pkill:*)",
+      "Bash(python3:*)",
+      "Bash(sqlite3:*)",
+      "Bash(test:*)",
+      "Bash(while read f)",
+      "WebSearch"
+    ]
+  }
 }

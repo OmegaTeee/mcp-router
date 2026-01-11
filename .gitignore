@@ -53,12 +53,17 @@ htmlcov/
 secrets/
 *.pem
 *.key
+.envrc
 
 # Reference material (symlink)
 mcp-example
+qdrant_storage
 
 # Python
 __pycache__/
 **/__pycache__/
 *.py[cod]
 refactor-mcp-example
+
+# Other
+.kilocode

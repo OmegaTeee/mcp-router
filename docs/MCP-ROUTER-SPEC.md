@@ -746,6 +746,7 @@ Internal ports start at **3001** and increment:
 2. **Register in `configs/mcp-servers.json`** (file location: `configs/`):
 
 For **STDIO** servers (most common):
+
 ```json
 "my-server": {
   "transport": "stdio",
@@ -754,6 +755,7 @@ For **STDIO** servers (most common):
 ```
 
 For **HTTP** servers:
+
 ```json
 "my-server": {
   "transport": "http",
@@ -1082,7 +1084,6 @@ async def run_documentation_pipeline(
 | API reference | `~/Obsidian/Projects/{name}/API.md` |
 | Meeting notes | `~/Obsidian/Meetings/{date}-{topic}.md` |
 | Learning notes | `~/Obsidian/Learning/{topic}.md` |
-
 
 ---
 
@@ -1748,6 +1749,7 @@ Phase 2: MCP Router Core (router, enhancement, circuit breakers)
 ### 7.5 Common Tasks
 
 **Add a new MCP server:**
+
 ```bash
 # 1. Add to docker-compose.yml
 # 2. Register in configs/mcp-servers.json
@@ -1756,6 +1758,7 @@ docker compose up -d
 ```
 
 **Test enhancement locally:**
+
 ```bash
 curl -X POST http://localhost:9090/ollama/enhance \
   -H "Content-Type: application/json" \
@@ -1763,26 +1766,31 @@ curl -X POST http://localhost:9090/ollama/enhance \
 ```
 
 **Check system health:**
+
 ```bash
 curl http://localhost:9090/health | jq
 ```
 
 **View circuit breaker states:**
+
 ```bash
 curl http://localhost:9090/health | jq '.circuit_breakers'
 ```
 
 **Clear prompt cache:**
+
 ```bash
 curl -X POST http://localhost:9090/dashboard/actions/clear-cache
 ```
 
 **Tail router logs:**
+
 ```bash
 docker compose logs -f router
 ```
 
 **Run documentation pipeline:**
+
 ```bash
 curl -X POST "http://localhost:9090/pipelines/documentation?repo_path=/path/to/repo&project_name=my-project"
 ```
@@ -1988,6 +1996,7 @@ qdrant_storage/
 Aggregate health status of all services.
 
 **Response:**
+
 ```json
 {
   "status": "healthy",
@@ -2003,6 +2012,7 @@ Aggregate health status of all services.
 Health status of a specific MCP server.
 
 **Response:**
+
 ```json
 {
   "server": "context7",
@@ -2020,6 +2030,7 @@ Health status of a specific MCP server.
 Proxy JSON-RPC requests to upstream MCP servers.
 
 **Request:**
+
 ```json
 {
   "jsonrpc": "2.0",
@@ -2036,6 +2047,7 @@ Proxy JSON-RPC requests to upstream MCP servers.
 - `X-Client-Name`: Client identifier (e.g., `claude-desktop`, `vscode`)
 
 **Response:**
+
 ```json
 {
   "jsonrpc": "2.0",
@@ -2055,6 +2067,7 @@ Proxy JSON-RPC requests to upstream MCP servers.
 Directly enhance a prompt via Ollama.
 
 **Request:**
+
 ```json
 {
   "prompt": "explain docker networking",
@@ -2063,6 +2076,7 @@ Directly enhance a prompt via Ollama.
 ```
 
 **Response:**
+
 ```json
 {
   "original": "explain docker networking",
@@ -2081,6 +2095,7 @@ Directly enhance a prompt via Ollama.
 Fetch tool schemas from all registered MCP servers.
 
 **Response:**
+
 ```json
 {
   "context7": [
@@ -2120,6 +2135,7 @@ Generate documentation from a codebase.
 - `vault_path` (optional): Obsidian vault path (default: `~/Obsidian/Projects`)
 
 **Response:**
+
 ```json
 {
   "status": "complete",
@@ -2141,6 +2157,7 @@ Serve the dashboard HTML page.
 Clear the prompt cache.
 
 **Response:**
+
 ```json
 {"status": "cache_cleared"}
 ```
@@ -2150,6 +2167,7 @@ Clear the prompt cache.
 Restart a specific MCP server (STDIO adapters only).
 
 **Response:**
+
 ```json
 {"status": "context7_restarted"}
 ```
@@ -2173,6 +2191,7 @@ All endpoints return standard JSON-RPC errors:
 ```
 
 **Common Error Codes:**
+
 | Code | Meaning |
 |------|---------|
 | -32600 | Invalid Request |

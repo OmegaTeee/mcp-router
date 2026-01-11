@@ -19,6 +19,7 @@ Think of it as a **second brain** for messy thinking, while VS Code holds clean,
 ## Getting Started
 
 ### 1. Install Obsidian
+
 ```bash
 brew install --cask obsidian
 ```
@@ -199,6 +200,7 @@ SORT file.mtime DESC
 
 ## Open Questions
 ![[Questions#Open]]
+
 ```
 
 ### Research Template
@@ -391,6 +393,7 @@ When an idea is ready to implement:
 Put your vault in `~/Documents/` - iCloud syncs automatically
 
 ### Option 2: Git (Version Control)
+
 ```bash
 cd ~/Documents/Obsidian
 git init
