@@ -39,6 +39,10 @@ A containerized MCP router that unifies AI tool access across desktop applicatio
 - Not a general-purpose API gateway
 - Not replacing Claude or Copilot—enhancing their capabilities
 - Not managing LLM inference (Ollama handles that separately)
+- Not a user management system—no registration, login, profiles, or RBAC
+- Not exposed to the internet—runs on `localhost` for desktop apps
+
+> **If external access is needed**: Use a simple API key header (`X-API-Key`), not a full auth system. Desktop clients are already authenticated by the OS.
 
 ### Target Clients
 
