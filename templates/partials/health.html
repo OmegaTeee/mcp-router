@@ -1,0 +1,11 @@
+<ul class="service-list">
+{% for service in services %}
+    <li class="service-item">
+        <span class="service-name">
+            <span class="status-dot {{ service.status }}"></span>
+            {{ service.name }}
+        </span>
+        <span class="status-badge {{ service.status }}">{{ service.status }}</span>
+    </li>
+{% endfor %}
+</ul>

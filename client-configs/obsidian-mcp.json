@@ -1,0 +1,14 @@
+{
+  "_comment": "Obsidian MCP Plugin Configuration",
+  "_install": "Configure in Obsidian MCP plugin settings, or use with custom integration",
+  "mcp_endpoint": "http://localhost:9090",
+  "client_name": "obsidian",
+  "default_vault_path": "~/Obsidian",
+  "auto_link": true,
+  "enhancement": {
+    "enabled": true,
+    "format": "markdown",
+    "use_wikilinks": true,
+    "use_tags": true
+  }
+}

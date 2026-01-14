@@ -38,12 +38,12 @@ Open Obsidian and select "Open folder as vault" → choose `~/Documents/Obsidian
 
 Go to **Settings** (gear icon):
 
-| Setting | Location | Value |
-|---------|----------|-------|
-| Default location for new notes | Files & Links | `Inbox/` |
-| Use [[Wikilinks]] | Files & Links | ON |
-| Detect all file extensions | Files & Links | ON |
-| Vim mode (optional) | Editor | ON if you use Vim |
+| Setting                        | Location      | Value             |
+| ------------------------------ | ------------- | ----------------- |
+| Default location for new notes | Files & Links | `Inbox/`          |
+| Use [[Wikilinks]]              | Files & Links | ON                |
+| Detect all file extensions     | Files & Links | ON                |
+| Vim mode (optional)            | Editor        | ON if you use Vim |
 
 ---
 

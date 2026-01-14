@@ -427,6 +427,8 @@ Qdrant replaces the in-memory `embed_cache` with persistent, indexed vector stor
 
 **Colima Prerequisite** (macOS):
 
+[Install Guide](https://smallsharpsoftwaretools.com/tutorials/use-colima-to-run-docker-containers-on-macos/)
+
 ```bash
 # Ensure Colima is running with Docker runtime
 colima status

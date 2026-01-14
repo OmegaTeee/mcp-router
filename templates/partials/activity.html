@@ -1,0 +1,14 @@
+{% for item in activity %}
+<div class="activity-item">
+    <span class="activity-time">{{ item.time }}</span>
+    <span class="activity-method">{{ item.method }}</span>
+    <span class="activity-path">{{ item.path }}</span>
+    <span class="activity-status s{{ item.status_class }}">{{ item.status }}</span>
+    <span class="activity-latency">{{ item.latency_ms }}ms</span>
+</div>
+{% endfor %}
+{% if not activity %}
+<div style="color: var(--text-muted); text-align: center; padding: 20px;">
+    No recent activity
+</div>
+{% endif %}

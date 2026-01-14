@@ -1,0 +1,15 @@
+{
+  "enabledMcpjsonServers": [
+    "fetch",
+    "desktop-commander",
+    "sequential-thinking",
+    "deepseek-reasoner",
+    "skills-mcp",
+    "context7",
+    "obsidian",
+    "obsidian-mcp-tools",
+    "hugging-face",
+    "draw-things",
+    "llm-text"
+  ]
+}

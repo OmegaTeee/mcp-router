@@ -1,0 +1,30 @@
+{
+  "default": {
+    "enabled": true,
+    "model": "llama3.2:latest",
+    "system_prompt": "Improve clarity and structure. Preserve intent. Return only the enhanced prompt."
+  },
+  "clients": {
+    "claude-desktop": {
+      "enabled": true,
+      "model": "deepseek-r1:latest",
+      "system_prompt": "Provide structured responses with clear reasoning. Use Markdown."
+    },
+    "vscode": {
+      "enabled": true,
+      "model": "qwen3-coder:30b",
+      "system_prompt": "Code-first responses. Include file paths. Minimal prose."
+    },
+    "raycast": {
+      "enabled": true,
+      "model": "llama3.2:latest",
+      "system_prompt": "Action-oriented. Suggest CLI commands. Under 200 words."
+    },
+    "obsidian": {
+      "enabled": true,
+      "model": "llama3.2:latest",
+      "system_prompt": "Format in Markdown. Use [[wikilinks]] and #tags."
+    }
+  },
+  "fallback_chain": ["llama3.2:latest", null]
+}

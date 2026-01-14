@@ -1,0 +1,28 @@
+{
+  "servers": {
+    "context7": {
+      "transport": "stdio",
+      "command": ["node", "node_modules/@upstash/context7-mcp/dist/index.js"],
+      "health_endpoint": null,
+      "env": {}
+    },
+    "desktop-commander": {
+      "transport": "stdio",
+      "command": ["node", "node_modules/@wonderwhy-er/desktop-commander/dist/index.js"],
+      "health_endpoint": null,
+      "env": {}
+    },
+    "sequential-thinking": {
+      "transport": "stdio",
+      "command": ["node", "node_modules/@modelcontextprotocol/server-sequential-thinking/dist/index.js"],
+      "health_endpoint": null,
+      "env": {}
+    },
+    "memory": {
+      "transport": "stdio",
+      "command": ["node", "node_modules/@modelcontextprotocol/server-memory/dist/index.js"],
+      "health_endpoint": null,
+      "env": {}
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "_comment": "Claude Desktop MCP Configuration",
+  "_install": "Copy to: ~/Library/Application Support/Claude/claude_desktop_config.json",
+  "_note": "Use either SSE transport (recommended) or command-based transport",
+  "mcpServers": {
+    "mcp-router-sse": {
+      "_comment": "SSE Transport (recommended for real-time communication)",
+      "url": "http://localhost:9090/sse",
+      "transport": "sse"
+    },
+    "mcp-router-http": {
+      "_comment": "HTTP Transport (fallback)",
+      "command": "curl",
+      "args": [
+        "-s",
+        "-X", "POST",
+        "-H", "Content-Type: application/json",
+        "-H", "X-Client-Name: claude-desktop",
+        "http://localhost:9090/mcp"
+      ],
+      "env": {}
+    }
+  }
+}

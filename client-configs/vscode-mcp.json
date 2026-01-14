@@ -1,0 +1,14 @@
+{
+  "_comment": "VS Code MCP Configuration",
+  "_install": "Copy to: .vscode/mcp.json in your workspace, or add to VS Code settings",
+  "mcp.servers": {
+    "mcp-router": {
+      "type": "http",
+      "url": "http://localhost:9090",
+      "headers": {
+        "X-Client-Name": "vscode",
+        "Content-Type": "application/json"
+      }
+    }
+  }
+}

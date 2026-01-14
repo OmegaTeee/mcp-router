@@ -1,0 +1,23 @@
+<ul class="service-list">
+{% for breaker in breakers %}
+    <li class="service-item">
+        <span class="service-name">
+            <span class="status-dot {% if breaker.state == 'closed' %}healthy{% elif breaker.state == 'half_open' %}degraded{% else %}down{% endif %}"></span>
+            {{ breaker.name }}
+        </span>
+        <span>
+            <span class="status-badge {{ breaker.state }}">{{ breaker.state }}</span>
+            {% if breaker.failures > 0 %}
+            <span style="color: var(--text-muted); font-size: 0.75rem; margin-left: 8px;">
+                {{ breaker.failures }}/{{ breaker.failure_threshold }} failures
+            </span>
+            {% endif %}
+        </span>
+    </li>
+{% endfor %}
+{% if not breakers %}
+    <li class="service-item" style="color: var(--text-muted);">
+        No circuit breakers active
+    </li>
+{% endif %}
+</ul>

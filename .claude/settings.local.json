@@ -1,9 +1,4 @@
 {
-  "disabledMcpjsonServers": [
-    "hugging-face",
-    "draw-things",
-    "llm-text"
-  ],
   "permissions": {
     "allow": [
       "Bash(~/.zshrc)",
@@ -29,7 +24,44 @@
       "Bash(sqlite3:*)",
       "Bash(test:*)",
       "Bash(while read f)",
-      "WebSearch"
+      "WebSearch",
+      "mcp__skills-mcp__list_skills",
+      "Bash(source:*)",
+      "Bash(python:*)",
+      "Bash(timeout 5 uvicorn:*)",
+      "Bash(uvicorn:*)",
+      "Bash(docker compose config:*)",
+      "Bash(colima status:*)",
+      "Bash(export DOCKER_HOST=\"unix://$HOME/.colima/default/docker.sock\")",
+      "Bash(docker compose:*)",
+      "Bash(docker-compose version:*)",
+      "Bash(docker-compose config:*)",
+      "Bash(npm install:*)",
+      "Bash(docker-compose build:*)",
+      "Bash(docker-compose up:*)",
+      "Bash(docker-compose down:*)",
+      "Bash(docker-compose ps:*)",
+      "Bash(docker-compose logs:*)",
+      "Bash(docker exec:*)",
+      "Bash(DOCKER_HOST=\"unix://$HOME/.colima/default/docker.sock\" docker exec:*)",
+      "Bash(docker:*)",
+      "Bash(docker-compose restart:*)",
+      "Bash(timeout 3 curl:*)",
+      "Bash(docker stop:*)",
+      "Bash(docker rm:*)"
     ]
-  }
+  },
+  "disabledMcpjsonServers": [
+    "hugging-face",
+    "draw-things",
+    "llm-text",
+    "fetch",
+    "desktop-commander",
+    "sequential-thinking",
+    "deepseek-reasoner",
+    "skills-mcp",
+    "context7",
+    "obsidian",
+    "obsidian-mcp-tools"
+  ]
 }

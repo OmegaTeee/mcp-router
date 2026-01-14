@@ -29,8 +29,9 @@ fi
 # Map of env var names to ks secret keys
 declare -A SECRET_MAP=(
     ["OBSIDIAN_API_KEY"]="obsidian_api_key"
-    ["FIGMA_API_KEY"]="figma_api_key"
+    ["HUGGINGFACE_API_KEY"]="huggingface_api_key"
     ["GITHUB_TOKEN"]="github_token"
+    ["FIGMA_API_KEY"]="figma_api_key"
 )
 
 # Append secrets from Keychain

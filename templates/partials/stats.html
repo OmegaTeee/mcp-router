@@ -1,0 +1,22 @@
+<div class="stat-grid">
+    <div class="stat-item">
+        <div class="stat-value green">{{ stats.l1_hits }}</div>
+        <div class="stat-label">L1 Hits</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">{{ stats.l1_misses }}</div>
+        <div class="stat-label">L1 Misses</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value blue">{{ stats.l2_hits }}</div>
+        <div class="stat-label">L2 Hits</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">{{ stats.l2_misses }}</div>
+        <div class="stat-label">L2 Misses</div>
+    </div>
+    <div class="stat-item" style="grid-column: span 2;">
+        <div class="stat-value purple">{{ stats.hit_rate }}%</div>
+        <div class="stat-label">Hit Rate</div>
+    </div>
+</div>

@@ -66,4 +66,6 @@ __pycache__/
 refactor-mcp-example
 
 # Other
-.kilocode
+.kilocode**
+.copilot**
+.obsidian**

@@ -36,6 +36,15 @@ class Settings(BaseSettings):
         default="http://sequential-thinking:3003", description="Sequential Thinking server URL"
     )
 
+    # Cache Configuration
+    cache_max_size: int = Field(default=1000, description="Max cache entries")
+    cache_similarity_threshold: float = Field(
+        default=0.85, description="Semantic similarity threshold for L2 cache"
+    )
+
+    # Qdrant Configuration (for persistent L2 cache)
+    qdrant_url: str | None = Field(default=None, description="Qdrant server URL")
+
     # Optional API Keys
     obsidian_api_key: str | None = Field(default=None, description="Obsidian REST API key")
     figma_api_key: str | None = Field(default=None, description="Figma API key")

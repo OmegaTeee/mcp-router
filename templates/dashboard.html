@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP Router Dashboard</title>
+
+    <!-- <script src="https://unpkg.com/htmx.org@1.9.10"></script> -->
+    <script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
+    <style>
+        :root {
+            --bg: #0f0f1a;
+            --bg-card: #1a1a2e;
+            --bg-hover: #252540;
+            --text: #e4e4e7;
+            --text-muted: #a1a1aa;
+            --green: #4ade80;
+            --yellow: #facc15;
+            --red: #f87171;
+            --blue: #60a5fa;
+            --purple: #a78bfa;
+            --border: #27272a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        h1::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .version {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .card h2 {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 16px;
+        }
+
+        .service-list {
+            list-style: none;
+        }
+
+        .service-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .service-item:last-child {
+            border-bottom: none;
+        }
+
+        .service-name {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-dot.healthy { background: var(--green); }
+        .status-dot.degraded { background: var(--yellow); }
+        .status-dot.down { background: var(--red); }
+
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .status-badge.healthy { background: rgba(74, 222, 128, 0.1); color: var(--green); }
+        .status-badge.degraded { background: rgba(250, 204, 21, 0.1); color: var(--yellow); }
+        .status-badge.down { background: rgba(248, 113, 113, 0.1); color: var(--red); }
+        .status-badge.closed { background: rgba(74, 222, 128, 0.1); color: var(--green); }
+        .status-badge.open { background: rgba(248, 113, 113, 0.1); color: var(--red); }
+        .status-badge.half_open { background: rgba(250, 204, 21, 0.1); color: var(--yellow); }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 16px;
+            background: var(--bg);
+            border-radius: 8px;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-value.green { color: var(--green); }
+        .stat-value.blue { color: var(--blue); }
+        .stat-value.purple { color: var(--purple); }
+
+        .activity-log {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            display: grid;
+            grid-template-columns: 80px 60px 1fr 60px 80px;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.875rem;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-time { color: var(--text-muted); }
+        .activity-method { color: var(--blue); font-weight: 500; }
+        .activity-path { color: var(--text); overflow: hidden; text-overflow: ellipsis; }
+        .activity-status { text-align: right; }
+        .activity-status.s2xx { color: var(--green); }
+        .activity-status.s4xx { color: var(--yellow); }
+        .activity-status.s5xx { color: var(--red); }
+        .activity-latency { color: var(--text-muted); text-align: right; }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: var(--bg-hover);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.15s ease;
+        }
+
+        button:hover {
+            background: var(--border);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: var(--text-muted);
+        }
+
+        .htmx-indicator {
+            opacity: 0;
+            transition: opacity 200ms ease-in;
+        }
+
+        .htmx-request .htmx-indicator {
+            opacity: 1;
+        }
+
+        footer {
+            margin-top: 32px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>MCP Router</h1>
+            <span class="version">v0.2.0</span>
+        </header>
+
+        <div class="grid">
+            <!-- Services Health -->
+            <div class="card">
+                <h2>Services</h2>
+                <div id="services-health"
+                     hx-get="/dashboard/health-partial"
+                     hx-trigger="load, every 5s"
+                     hx-swap="innerHTML">
+                    <div class="loading">Loading services...</div>
+                </div>
+            </div>
+
+            <!-- Cache Stats -->
+            <div class="card">
+                <h2>Cache Statistics</h2>
+                <div id="cache-stats"
+                     hx-get="/dashboard/stats-partial"
+                     hx-trigger="load, every 10s"
+                     hx-swap="innerHTML">
+                    <div class="loading">Loading stats...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Circuit Breakers -->
+        <div class="card" style="margin-bottom: 24px;">
+            <h2>Circuit Breakers</h2>
+            <div id="circuit-breakers"
+                 hx-get="/dashboard/breakers-partial"
+                 hx-trigger="load, every 5s"
+                 hx-swap="innerHTML">
+                <div class="loading">Loading circuit breakers...</div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card" style="margin-bottom: 24px;">
+            <h2>Quick Actions</h2>
+            <div class="actions">
+                <button hx-post="/actions/clear-cache"
+                        hx-swap="none"
+                        hx-confirm="Clear prompt cache?">
+                    Clear Cache
+                </button>
+                <button hx-post="/actions/reset-breakers"
+                        hx-swap="none"
+                        hx-confirm="Reset all circuit breakers?">
+                    Reset Breakers
+                </button>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="card">
+            <h2>Recent Activity</h2>
+            <div id="activity-log"
+                 hx-get="/dashboard/activity-partial"
+                 hx-trigger="load, every 3s"
+                 hx-swap="innerHTML"
+                 class="activity-log">
+                <div class="loading">Loading activity...</div>
+            </div>
+        </div>
+
+        <footer>
+            MCP Router Dashboard &middot; Auto-refreshing via HTMX
+        </footer>
+    </div>
+</body>
+</html>
