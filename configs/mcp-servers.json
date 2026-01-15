@@ -23,6 +23,12 @@
       "command": ["node", "node_modules/@modelcontextprotocol/server-memory/dist/index.js"],
       "health_endpoint": null,
       "env": {}
+    },
+    "fetch": {
+      "transport": "stdio",
+      "command": ["mcp-server-fetch"],
+      "health_endpoint": null,
+      "env": {}
     }
   }
 }
