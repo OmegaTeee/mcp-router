@@ -46,9 +46,9 @@ class ServerRegistry:
                 with open(self.config_path) as f:
                     data = json.load(f)
                     for name, config in data.get("servers", {}).items():
-                        self.servers[name] = ServerConfig(**config)
-                        # Code Review Commet: Consider validating server configurations here to catch errors early. The variable config is a ServerConfig Pydantic model, not a dictionary. Calling .get('transport') will raise an AttributeError. Use config.transport instead to access the attribute.
-                        logger.info(f"Registered server: {name} ({config.get('transport')})")
+                        server_config = ServerConfig(**config)
+                        self.servers[name] = server_config
+                        logger.info(f"Registered server: {name} ({server_config.transport})")
             else:
                 logger.warning(f"Config not found at {self.config_path}")
         except Exception as e:

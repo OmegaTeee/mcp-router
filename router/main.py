@@ -17,6 +17,8 @@ import httpx
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 
+from pathlib import Path
+
 from router.cache import PromptCache
 from router.config import get_settings
 from router.dashboard import dashboard_router
@@ -25,6 +27,41 @@ from router.models import JSONRPCRequest, JSONRPCResponse, ErrorCode
 from router.pipelines.documentation import documentation_pipeline
 from router.registry import ServerRegistry
 from router.sse import sse_router
+
+
+# Allowed root directories for path validation (security)
+ALLOWED_PATH_ROOTS = [
+    Path.home(),
+    Path("/tmp"),
+    Path("/var/tmp"),
+]
+
+
+def validate_path(path: str) -> Path:
+    """Validate that a path is within allowed directories.
+
+    Args:
+        path: Path string to validate
+
+    Returns:
+        Resolved Path object
+
+    Raises:
+        ValueError: If path is outside allowed directories
+    """
+    resolved = Path(path).expanduser().resolve()
+
+    for allowed_root in ALLOWED_PATH_ROOTS:
+        try:
+            resolved.relative_to(allowed_root.resolve())
+            return resolved
+        except ValueError:
+            continue
+
+    raise ValueError(
+        f"Path '{path}' is not within allowed directories. "
+        f"Allowed roots: {[str(r) for r in ALLOWED_PATH_ROOTS]}"
+    )
 
 # Configure logging
 logging.basicConfig(
@@ -408,6 +445,12 @@ async def run_documentation_pipeline(
         project_name: Name for the output file
         vault_path: Path to Obsidian vault
     """
+    # Validate paths to prevent path traversal attacks
+    try:
+        validate_path(repo_path)
+        validate_path(vault_path)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     # Create wrapper functions for the pipeline
     async def enhance_fn(prompt: str, client: str) -> dict:
         if enhancement_middleware:
@@ -442,12 +485,14 @@ def main() -> None:
     import uvicorn
 
     settings = get_settings()
+    # Only enable reload in debug mode (security/performance concern in production)
+    enable_reload = settings.log_level.lower() == "debug"
     uvicorn.run(
         "router.main:app",
         host=settings.router_host,
         port=settings.router_port,
         log_level=settings.log_level,
-        reload=True,
+        reload=enable_reload,
     )
 
 

@@ -15,11 +15,16 @@ Usage:
 """
 
 import logging
+from collections.abc import Awaitable, Callable
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from router.models import JSONRPCRequest
+from router.models import JSONRPCRequest, JSONRPCResponse
+
+# Type aliases for pipeline functions
+EnhanceFn = Callable[[str, str], Awaitable[dict[str, Any]]]
+RouteFn = Callable[[str, JSONRPCRequest], Awaitable[JSONRPCResponse]]
 
 logger = logging.getLogger(__name__)
 
@@ -28,8 +33,8 @@ async def documentation_pipeline(
     repo_path: str,
     project_name: str,
     vault_path: str = "~/Obsidian/Projects",
-    enhance_fn: Any = None,
-    route_fn: Any = None,
+    enhance_fn: EnhanceFn | None = None,
+    route_fn: RouteFn | None = None,
 ) -> dict[str, Any]:
     """Generate documentation from a codebase and write to Obsidian.
 

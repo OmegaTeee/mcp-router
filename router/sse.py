@@ -13,6 +13,7 @@ MCP SSE Protocol:
 import asyncio
 import json
 import logging
+import time
 import uuid
 from typing import Any, AsyncGenerator
 
@@ -28,8 +29,8 @@ sse_router = APIRouter(tags=["sse"])
 
 # Session storage (in-memory for simplicity)
 # In production, use Redis or similar for distributed sessions
-# Code review commet: Consider session expiration and cleanup mechanisms. The global sessions dictionary is accessed from multiple async handlers without synchronization. This creates a race condition where concurrent requests could lead to inconsistent state during session creation, deletion, or access. Consider using asyncio.Lock() to protect critical sections or use a thread-safe data structure.
 sessions: dict[str, "SSESession"] = {}
+sessions_lock = asyncio.Lock()
 
 
 class SSESession:
@@ -39,7 +40,7 @@ class SSESession:
         self.session_id = session_id
         self.queue: asyncio.Queue[str] = asyncio.Queue()
         self.active = True
-        self.created_at = asyncio.get_event_loop().time()
+        self.created_at = time.monotonic()
 
     async def send(self, event: str, data: Any) -> None:
         """Queue an SSE event to be sent."""
@@ -79,8 +80,8 @@ async def event_generator(session: SSESession) -> AsyncGenerator[str, None]:
         logger.info(f"SSE session {session.session_id} cancelled")
     finally:
         session.close()
-        if session.session_id in sessions:
-            del sessions[session.session_id]
+        async with sessions_lock:
+            sessions.pop(session.session_id, None)
 
 
 @sse_router.get("/sse")
@@ -94,7 +95,8 @@ async def sse_connect(request: Request) -> StreamingResponse:
     # Create new session
     session_id = str(uuid.uuid4())
     session = SSESession(session_id)
-    sessions[session_id] = session
+    async with sessions_lock:
+        sessions[session_id] = session
 
     logger.info(f"New SSE session: {session_id}")
 
@@ -126,7 +128,8 @@ async def sse_message(
     The response is sent via the SSE stream, not in this HTTP response.
     """
     # Validate session
-    session = sessions.get(session_id)
+    async with sessions_lock:
+        session = sessions.get(session_id)
     if not session or not session.active:
         raise HTTPException(status_code=404, detail="Session not found or expired")
 
@@ -189,10 +192,10 @@ async def sse_message(
 @sse_router.delete("/sse/{session_id}")
 async def sse_disconnect(session_id: str) -> dict[str, str]:
     """Explicitly close an SSE session."""
-    session = sessions.get(session_id)
+    async with sessions_lock:
+        session = sessions.pop(session_id, None)
     if session:
         session.close()
-        del sessions[session_id]
         logger.info(f"SSE session closed: {session_id}")
         return {"status": "closed"}
 
@@ -202,14 +205,14 @@ async def sse_disconnect(session_id: str) -> dict[str, str]:
 @sse_router.get("/sse/sessions")
 async def list_sessions() -> dict[str, Any]:
     """List active SSE sessions (for debugging)."""
-    return {
-        "count": len(sessions),
-        "sessions": [
+    async with sessions_lock:
+        session_list = [
             {
                 "session_id": s.session_id,
                 "active": s.active,
                 "queue_size": s.queue.qsize(),
             }
             for s in sessions.values()
-        ],
-    }
+        ]
+        count = len(sessions)
+    return {"count": count, "sessions": session_list}
