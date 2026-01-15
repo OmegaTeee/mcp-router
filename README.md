@@ -78,6 +78,16 @@ Desktop Apps → MCP Router (:9090) → Ollama Enhancement → MCP Servers
 
 ## Configuration
 
+### MCP Configuration Files
+
+| File | Purpose |
+|------|---------|
+| `configs/mcp-servers.json` | Router's internal config defining aggregated MCP servers |
+| `mcp.json` | **Client config** for testing router endpoints (SSE/HTTP to :9090) |
+| `.mcp.json` | Symlink to original MCP servers being refactored (`~/.local/share/mcps/.mcp.json`) |
+
+**Testing workflow**: Use `mcp.json` to test the new router, while `.mcp.json` references the original MCP setup for comparison.
+
 ### Environment Variables
 
 See `.env.example` for all options. Generate from Keychain:

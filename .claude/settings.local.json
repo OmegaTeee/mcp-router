@@ -48,7 +48,8 @@
       "Bash(docker-compose restart:*)",
       "Bash(timeout 3 curl:*)",
       "Bash(docker stop:*)",
-      "Bash(docker rm:*)"
+      "Bash(docker rm:*)",
+      "Read(/Users/visualval/.local/share/mcps/**)"
     ]
   },
   "disabledMcpjsonServers": [
