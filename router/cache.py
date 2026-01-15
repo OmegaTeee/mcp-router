@@ -95,6 +95,7 @@ class PromptCache:
 
         # L2: Qdrant client for vector similarity
         self.qdrant: QdrantClient | None = None
+        self.qdrant_url: str | None = None
         self.qdrant_available = False
 
         if qdrant_url:
@@ -105,6 +106,7 @@ class PromptCache:
     def _init_qdrant(self, url: str) -> None:
         """Initialize Qdrant client and collection."""
         try:
+            self.qdrant_url = url
             self.qdrant = QdrantClient(url=url, timeout=5.0)
 
             # Check if collection exists, create if not
@@ -194,19 +196,17 @@ class PromptCache:
             if results:
                 payload = results[0].payload
                 if payload:
+                    created_at_raw = payload.get("created_at")
+                    created_at = (
+                        datetime.fromisoformat(created_at_raw)
+                        if created_at_raw
+                        else datetime.now()
+                    )
                     return CacheEntry(
                         prompt=payload.get("prompt", ""),
                         response=payload.get("response", ""),
                         model=payload.get("model", ""),
-                        # Code Review Comment: The fallback value datetime.now().isoformat() returns a string, but datetime.fromisoformat() expects an ISO format string. If the payload lacks 'created_at', this will work, but the logic is confusing. Consider using datetime.now() directly as the fallback instead of converting to ISO and back.
-                        # Suggested change: 
-                        # created_at_raw = payload.get("created_at")
-                        # created_at = datetime.fromisoformat(created_at_raw) if created_at_raw else datetime.now()
-                        # return CacheEntry(
-                        #     prompt=payload.get("prompt", ""),
-                        #     response=payload.get("response", ""),                         model=payload.get("model", ""),
-                        #     created_at=created_at,
-                        created_at=datetime.fromisoformat(payload.get("created_at", datetime.now().isoformat())),
+                        created_at=created_at,
                         hits=payload.get("hits", 0),
                     )
         except Exception as e:
@@ -283,18 +283,10 @@ class PromptCache:
         self.exact_cache.clear()
 
         # Clear Qdrant collection if available
-        if self.qdrant_available and self.qdrant:
+        if self.qdrant_available and self.qdrant and self.qdrant_url:
             try:
                 self.qdrant.delete_collection(QDRANT_COLLECTION)
-                # Code Review Comment: Accessing the private attribute _client and then rest_uri violates encapsulation and may break if the Qdrant client library changes its internal structure. Consider storing the original URL in an instance variable during initialization or finding a public API method to retrieve the connection URL.
-                # Recreate empty collection without relying on private client attributes
-+               # scheme = "https" if getattr(self.qdrant, "https", False) else "http"
-+               # host = getattr(self.qdrant, "host", None)
-+               # port = getattr(self.qdrant, "port", None)
-+               # if host is not None and port is not None:
-+               #     qdrant_url = f"{scheme}://{host}:{port}"
-+               #     self._init_qdrant(qdrant_url)
-                self._init_qdrant(self.qdrant._client.rest_uri)  
+                self._init_qdrant(self.qdrant_url)
                 logger.info("Qdrant L2 cache cleared")
             except Exception as e:
                 logger.warning(f"Failed to clear Qdrant: {e}")

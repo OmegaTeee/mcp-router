@@ -37,8 +37,7 @@ logger = logging.getLogger(__name__)
 http_client: httpx.AsyncClient | None = None
 server_registry: ServerRegistry | None = None
 enhancement_middleware: EnhancementMiddleware | None = None
-# Code review comment: The variable request_log lacks a type annotation for the deque's contents. Adding deque[dict[str, Any]] would improve type safety and make it clear what structure the log entries have.
-request_log: deque = deque(maxlen=100)
+request_log: deque[dict[str, Any]] = deque(maxlen=100)
 
 
 @asynccontextmanager

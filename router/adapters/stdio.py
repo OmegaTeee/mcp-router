@@ -5,6 +5,7 @@ Handles subprocess management, JSON-RPC message framing, and automatic restarts.
 """
 
 import asyncio
+import itertools
 import json
 import logging
 from asyncio.subprocess import Process
@@ -47,8 +48,7 @@ class StdioAdapter:
         self.process: Process | None = None
         self.restart_count = 0
         self._lock = asyncio.Lock()
-        # Code review comment: The _request_id counter is incremented in the call() method, which is protected by _lock. However, this pattern could lead to issues if multiple instances share state or if the lock is removed in future refactoring. Consider using itertools.count() which is thread-safe by design.
-        self._request_id = 0
+        self._request_id_gen = itertools.count(1)
 
     async def start(self) -> None:
         """Start the subprocess."""
@@ -109,8 +109,7 @@ class StdioAdapter:
 
             # Assign request ID if not present
             if "id" not in request or request["id"] is None:
-                self._request_id += 1
-                request["id"] = self._request_id
+                request["id"] = next(self._request_id_gen)
 
             # Write newline-delimited JSON per MCP spec
             line = json.dumps(request) + "\n"

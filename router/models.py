@@ -77,6 +77,10 @@ class EnhancementRule(BaseModel):
     enabled: bool = Field(default=True, description="Whether enhancement is enabled")
     model: str = Field(..., description="Ollama model to use")
     system_prompt: str = Field(..., description="System prompt for enhancement")
+    prompt_template: str = Field(
+        default="Enhance this prompt:\n\n{prompt}",
+        description="Template for enhancement prompt. Use {prompt} as placeholder.",
+    )
 
 
 class EnhancementConfig(BaseModel):

@@ -199,25 +199,12 @@ class EnhancementMiddleware:
                     logger.warning(f"Prompt too large for {model}, trying next")
                     continue
 
+                enhancement_prompt = rule.prompt_template.format(prompt=prompt)
                 response = await http_client.post(
                     f"{self.ollama_url}/api/generate",
                     json={
                         "model": model,
-                        # Code review comment: [nitpick] The enhancement prompt is hardcoded in the method. If different enhancement strategies or prompt templates are needed, this creates duplication. Consider moving the enhancement template to the EnhancementRule model or configuration to make it configurable per client.
-                        # Suggestion: Build enhancement prompt from rule template (if provided)
-                        # template = getattr(
-                        #     rule,
-                        #     "enhancement_prompt_template",
-                        #     "Enhance this prompt:\n\n{prompt}",
-                        # )
-                        # enhancement_prompt = template.format(prompt=prompt)
-                        # 
-                        # response = await http_client.post(
-                        #     f"{self.ollama_url}/api/generate",
-                        #     json={
-                        #         "model": model,
-                        #         "prompt": enhancement_prompt,
-                        "prompt": f"Enhance this prompt:\n\n{prompt}",
+                        "prompt": enhancement_prompt,
                         "system": rule.system_prompt,
                         "stream": False,
                     },
